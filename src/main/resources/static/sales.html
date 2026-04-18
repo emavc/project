@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales / POS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .top-links {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .top-links a {
+            text-decoration: none;
+            margin: 0 10px;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 92%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+        }
+
+        .search-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-section input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .search-section button {
+            padding: 12px 18px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .search-section button:hover {
+            background: #0056b3;
+        }
+
+        .product-info {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .product-info p {
+            margin: 8px 0;
+        }
+
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .cart-table th,
+        .cart-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .cart-table th {
+            background: #007bff;
+            color: white;
+        }
+
+        .total-box {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .complete-sale-box {
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        .complete-sale-box button {
+            padding: 12px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .complete-sale-box button:hover {
+            background: #1f7f35;
+        }
+
+        .message {
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .receipt-section {
+            display: none;
+            margin-top: 30px;
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .receipt-section h3 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .receipt-table th,
+        .receipt-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .receipt-table th {
+            background: #f2f2f2;
+        }
+
+        .receipt-total {
+            text-align: right;
+            margin-top: 15px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .print-box {
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        .print-box button {
+            padding: 10px 18px;
+            background: #6c63ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .print-box button:hover {
+            background: #5248d8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-links">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/product.html">Add Product</a>
+        <a href="/products.html">View Products</a>
+    </div>
+
+    <div class="container">
+        <h2>Sales / POS Page</h2>
+
+        <div class="search-section">
+            <input type="text" id="barcodeInput" placeholder="Enter or scan barcode">
+            <button onclick="searchProduct()">Search</button>
+            <button onclick="addToCart()">Add To Cart</button>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div class="product-info">
+            <p><strong>Name:</strong> <span id="productName">-</span></p>
+            <p><strong>Code:</strong> <span id="productCode">-</span></p>
+            <p><strong>Barcode:</strong> <span id="productBarcode">-</span></p>
+            <p><strong>Price:</strong> <span id="productPrice">-</span></p>
+            <p><strong>Available Quantity:</strong> <span id="productQuantity">-</span></p>
+        </div>
+
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Barcode</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Action</th>
+                    <th>Quantity Conttol</th>
+                </tr>
+            </thead>
+            <tbody id="cartBody"></tbody>
+        </table>
+
+        <div class="total-box">
+            Total: <span id="totalAmount">0</span>
+        </div>
+
+        <div style="margin-top: 15px; text-align: right;">
+
+            <label for="amountPaid" style="font-weight: bold;">Amount Paid:</label>
+            <input type="number" id="amountPaid" placeholder="Enter amount received"
+
+           style="padding: 10px; width: 220px; margin-left: 10px; border: 1px solid #ccc; border-radius: 6px;"
+           oninput="calculateBalance()">
+        </div>
+
+        <div style="margin-top: 10px; text-align: right; font-size: 20px; font-weight: bold;">
+           Balance: <span id="balanceAmount">0</span>
+         </div>
+
+        <div class="complete-sale-box">
+            <button onclick="completeSale()">Complete Sale</button>
+        </div>
+        
+        <div style="text-align: right; margin-top: 10px;">
+          <button onclick="clearCart()" style="padding: 10px 18px; background:#dc3545; color:white; border:none; border-radius:6px; cursor:pointer;">
+            Clear Cart
+         </button>
+         </div>
+
+        <div id="receiptSection" class="receipt-section">
+            <h3>Supermarket Receipt</h3>
+            <p><strong>Sale ID:</strong> <span id="receiptSaleId"></span></p>
+            <p><strong>Date:</strong> <span id="receiptDate"></span></p>
+
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="receiptBody"></tbody>
+            </table>
+
+            <div class="receipt-total">
+                Total: <span id="receiptTotal"></span>
+            </div>
+
+            <p><strong>Amount Paid:</strong> <span id="receiptPaid"></span></p>
+            <p><strong>Balance:</strong> <span id="receiptBalance"></span></p>
+
+            <div class="print-box">
+                <button onclick="printReceipt()">Print Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentProduct = null;
+    let cart = [];
+
+    async function searchProduct() {
+        const barcode = document.getElementById("barcodeInput").value.trim();
+        const messageDiv = document.getElementById("message");
+
+        if (!barcode) {
+            messageDiv.textContent = "Please enter a barcode.";
+            messageDiv.className = "message error";
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/products/barcode/${barcode}`);
+
+            if (!response.ok) {
+                throw new Error("Product not found");
+            }
+
+            const product = await response.json();
+
+            if (!product) {
+                messageDiv.textContent = "No product found with that barcode.";
+                messageDiv.className = "message error";
+                clearProductInfo();
+                return;
+            }
+
+            currentProduct = product;
+
+            document.getElementById("productName").innerText = product.name;
+            document.getElementById("productCode").innerText = product.productCode;
+            document.getElementById("productBarcode").innerText = product.barcode;
+            document.getElementById("productPrice").innerText = product.sellingPrice;
+            document.getElementById("productQuantity").innerText = product.quantity;
+
+            messageDiv.textContent = "Product found successfully.";
+            messageDiv.className = "message success";
+
+        } catch (error) {
+            messageDiv.textContent = "Product not found.";
+            messageDiv.className = "message error";
+            clearProductInfo();
+        }
+    }
+
+    function clearProductInfo() {
+        currentProduct = null;
+        document.getElementById("productName").innerText = "-";
+        document.getElementById("productCode").innerText = "-";
+        document.getElementById("productBarcode").innerText = "-";
+        document.getElementById("productPrice").innerText = "-";
+        document.getElementById("productQuantity").innerText = "-";
+    }
+
+    function addToCart() {
+        const messageDiv = document.getElementById("message");
+
+        if (!currentProduct) {
+            messageDiv.textContent = "Search a product first.";
+            messageDiv.className = "message error";
+            return;
+        }
+
+        const existingItem = cart.find(item => item.barcode === currentProduct.barcode);
+
+        if (existingItem) {
+            existingItem.quantity += 1;
+            existingItem.subtotal = existingItem.quantity * existingItem.price;
+        } else {
+            cart.push({
+                name: currentProduct.name,
+                productCode: currentProduct.productCode,
+                barcode: currentProduct.barcode,
+                price: currentProduct.sellingPrice,
+                quantity: 1,
+                subtotal: currentProduct.sellingPrice
+            });
+        }
+
+        renderCart();
+
+        messageDiv.textContent = "Product added to cart.";
+        messageDiv.className = "message success";
+
+        document.getElementById("barcodeInput").value = "";
+        clearProductInfo();
+    }
+
+    function renderCart() {
+    const cartBody = document.getElementById("cartBody");
+    const totalAmount = document.getElementById("totalAmount");
+
+    cartBody.innerHTML = "";
+
+    let total = 0;
+
+    cart.forEach((item, index) => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.productCode}</td>
+            <td>${item.barcode}</td>
+            <td>${item.price}</td>
+            <td>
+                <button onclick="decreaseQuantity(${index})"
+                        style="padding:5px 10px; background:#ffc107; border:none; border-radius:4px; cursor:pointer;">-</button>
+                <span style="margin:0 10px; font-weight:bold;">${item.quantity}</span>
+                <button onclick="increaseQuantity(${index})"
+                        style="padding:5px 10px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">+</button>
+            </td>
+            <td>${item.subtotal}</td>
+            <td>
+                <button onclick="removeFromCart(${index})"
+                        style="padding:6px 12px; background:#dc3545; color:white; border:none; border-radius:4px; cursor:pointer;">
+                    Remove
+                </button>
+            </td>
+        `;
+
+        cartBody.appendChild(row);
+        total += item.subtotal;
+    });
+
+    totalAmount.innerText = total;
+    calculateBalance();
+}
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        renderCart();
+
+        const messageDiv = document.getElementById("message");
+        messageDiv.textContent = "Item removed from cart.";
+        messageDiv.className = "message success";
+    }
+
+    function clearCart() {
+        cart = [];
+        renderCart();
+        clearProductInfo();
+
+        document.getElementById("amountPaid").value = "";
+        document.getElementById("balanceAmount").innerText = "0";
+
+        const messageDiv = document.getElementById("message");
+        messageDiv.textContent = "Cart cleared.";
+        messageDiv.className = "message success";
+    }
+
+    function calculateBalance() {
+        const total = parseFloat(document.getElementById("totalAmount").innerText) || 0;
+        const paid = parseFloat(document.getElementById("amountPaid").value) || 0;
+        const balance = paid - total;
+
+        document.getElementById("balanceAmount").innerText = balance >= 0 ? balance : 0;
+    }
+
+    async function completeSale() {
+        const messageDiv = document.getElementById("message");
+
+        if (cart.length === 0) {
+            messageDiv.textContent = "Cart is empty.";
+            messageDiv.className = "message error";
+            return;
+        }
+
+        const total = parseFloat(document.getElementById("totalAmount").innerText) || 0;
+        const amountPaid = parseFloat(document.getElementById("amountPaid").value) || 0;
+
+        if (amountPaid < total) {
+            messageDiv.textContent = "Amount paid is less than total amount.";
+            messageDiv.className = "message error";
+            return;
+        }
+
+        const saleRequest = {
+            items: cart.map(item => ({
+                barcode: item.barcode,
+                quantity: item.quantity
+            })),
+            amountPaid: amountPaid
+        };
+
+        try {
+            const response = await fetch("/api/sales/complete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(saleRequest)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                messageDiv.textContent = "Sale failed: " + errorText;
+                messageDiv.className = "message error";
+                return;
+            }
+
+            const receipt = await response.json();
+
+            messageDiv.textContent = "Sale completed successfully!";
+            messageDiv.className = "message success";
+
+            showReceipt(receipt);
+
+            cart = [];
+            renderCart();
+            clearProductInfo();
+            document.getElementById("barcodeInput").value = "";
+            document.getElementById("amountPaid").value = "";
+            document.getElementById("balanceAmount").innerText = "0";
+
+        } catch (error) {
+            messageDiv.textContent = "Error completing sale: " + error.message;
+            messageDiv.className = "message error";
+        }
+    }
+
+    function showReceipt(receipt) {
+        const total = parseFloat(receipt.totalAmount) || 0;
+        const amountPaid = parseFloat(document.getElementById("amountPaid").value) || 0;
+        const balance = amountPaid - total;
+
+        document.getElementById("receiptSection").style.display = "block";
+        document.getElementById("receiptSaleId").innerText = receipt.saleId;
+        document.getElementById("receiptDate").innerText = receipt.saleDate;
+        document.getElementById("receiptTotal").innerText = receipt.totalAmount;
+        document.getElementById("receiptPaid").innerText = receipt.amountPaid;
+        document.getElementById("receiptBalance").innerText = receipt.balance;
+
+        const receiptBody = document.getElementById("receiptBody");
+        receiptBody.innerHTML = "";
+
+        receipt.items.forEach(item => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${item.productName}</td>
+                <td>${item.quantity}</td>
+                <td>${item.unitPrice}</td>
+                <td>${item.subtotal}</td>
+            `;
+
+            receiptBody.appendChild(row);
+        });
+    }
+
+    function printReceipt() {
+        const receiptContent = document.getElementById("receiptSection").innerHTML;
+        const printWindow = window.open("", "", "width=800,height=600");
+
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Print Receipt</title>
+            </head>
+            <body>
+                ${receiptContent}
+            </body>
+            </html>
+        `);
+
+        printWindow.document.close();
+        printWindow.print();
+    }
+    function increaseQuantity(index) {
+    cart[index].quantity += 1;
+    cart[index].subtotal = cart[index].quantity * cart[index].price;
+    renderCart();
+
+    const messageDiv = document.getElementById("message");
+    messageDiv.textContent = "Quantity increased.";
+    messageDiv.className = "message success";
+}
+function decreaseQuantity(index) {
+    if (cart[index].quantity > 1) {
+        cart[index].quantity -= 1;
+        cart[index].subtotal = cart[index].quantity * cart[index].price;
+    } else {
+        cart.splice(index, 1);
+    }
+
+    renderCart();
+
+    const messageDiv = document.getElementById("message");
+    messageDiv.textContent = "Quantity decreased.";
+    messageDiv.className = "message success";
+}
+</script>
+
+</body>
+</html>

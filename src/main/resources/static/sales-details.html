@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sale Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .top-links {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .top-links a {
+            text-decoration: none;
+            margin: 0 10px;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 95%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #333;
+        }
+
+        .info-box p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-links">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/sales_history.html">Sales History</a>
+        <a href="/sales.html">Sales Page</a>
+    </div>
+
+    <div class="container">
+        <h2>Sale Details</h2>
+
+        <div class="info-box">
+            <p><strong>Sale ID:</strong> <span id="saleId">-</span></p>
+            <p><strong>Date:</strong> <span id="saleDate">-</span></p>
+            <p><strong>Total Amount:</strong> <span id="totalAmount">-</span></p>
+            <p><strong>Amount Paid:</strong> <span id="amountPaid">-</span></p>
+            <p><strong>Balance:</strong> <span id="balance">-</span></p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="saleItemsBody"></tbody>
+        </table>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        function getSaleIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get("id");
+        }
+
+        async function loadSaleDetails() {
+            const saleId = getSaleIdFromUrl();
+            const messageDiv = document.getElementById("message");
+            const tableBody = document.getElementById("saleItemsBody");
+
+            if (!saleId) {
+                messageDiv.textContent = "Sale ID not found in URL.";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/sales/${saleId}`);
+
+                if (!response.ok) {
+                    throw new Error("Failed to load sale details");
+                }
+
+                const sale = await response.json();
+
+                document.getElementById("saleId").innerText = sale.saleId;
+                document.getElementById("saleDate").innerText = sale.saleDate;
+                document.getElementById("totalAmount").innerText = sale.totalAmount;
+                document.getElementById("amountPaid").innerText = sale.amountPaid;
+                document.getElementById("balance").innerText = sale.balance;
+
+                tableBody.innerHTML = "";
+
+                sale.items.forEach(item => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>${item.productName}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.unitPrice}</td>
+                        <td>${item.subtotal}</td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+
+            } catch (error) {
+                messageDiv.textContent = "Error loading sale details.";
+                console.error(error);
+            }
+        }
+
+        loadSaleDetails();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Supermarket System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-box {
+            background: white;
+            padding: 30px;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .message {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .demo {
+            margin-top: 20px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>System Login</h2>
+
+    <div id="messageBox" class="message"></div>
+
+    <form method="POST" action="/perform_login">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" required>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required>
+        </div>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <div class="demo">
+        <strong>Demo users:</strong><br>
+        admin / admin123<br>
+        cashier / cashier123
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const box = document.getElementById("messageBox");
+
+    if (params.has("error")) {
+        box.textContent = "Invalid username or password";
+        box.className = "message error";
+    }
+
+    if (params.has("logout")) {
+        box.textContent = "You have logged out successfully";
+        box.className = "message success";
+    }
+</script>
+
+</body>
+</html>

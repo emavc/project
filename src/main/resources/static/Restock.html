@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Restock Products</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .message {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Restock Products</h1>
+
+    <div id="messageBox" class="message"></div>
+
+    <div class="form-group">
+        <label for="productCode">Product Code</label>
+        <input type="text" id="productCode" placeholder="Enter product code">
+    </div>
+
+    <div class="form-group">
+        <label for="quantity">Quantity to Add</label>
+        <input type="number" id="quantity" placeholder="Enter quantity">
+    </div>
+
+    <div class="form-group">
+        <label for="note">Note</label>
+        <textarea id="note" rows="3" placeholder="Example: New stock delivered"></textarea>
+    </div>
+
+    <button onclick="restockProduct()">Restock Product</button>
+
+    <h2>Restock History</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Product Code</th>
+            <th>Product Name</th>
+            <th>Quantity Added</th>
+            <th>Note</th>
+            <th>Restocked At</th>
+        </tr>
+        </thead>
+        <tbody id="historyTableBody"></tbody>
+    </table>
+</div>
+
+<script>
+    const API_BASE = "http://localhost:8080/api/stock";
+
+    function showMessage(message, type) {
+        const box = document.getElementById("messageBox");
+        box.style.display = "block";
+        box.className = "message " + type;
+        box.textContent = message;
+    }
+
+    async function restockProduct() {
+        const productCode = document.getElementById("productCode").value.trim();
+        const quantity = parseInt(document.getElementById("quantity").value);
+        const note = document.getElementById("note").value.trim();
+
+        if (!productCode || !quantity || quantity <= 0) {
+            showMessage("Please enter valid product code and quantity.", "error");
+            return;
+        }
+
+        const payload = {
+            productCode: productCode,
+            quantity: quantity,
+            note: note
+        };
+
+        try {
+            const response = await fetch(`${API_BASE}/restock`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || "Failed to restock product");
+            }
+
+            showMessage(result.message, "success");
+
+            document.getElementById("productCode").value = "";
+            document.getElementById("quantity").value = "";
+            document.getElementById("note").value = "";
+
+            loadRestockHistory();
+
+        } catch (error) {
+            showMessage(error.message, "error");
+        }
+    }
+
+    async function loadRestockHistory() {
+        try {
+            const response = await fetch(`${API_BASE}/history`);
+            const history = await response.json();
+
+            const tableBody = document.getElementById("historyTableBody");
+            tableBody.innerHTML = "";
+
+            history.forEach(item => {
+                const row = `
+                    <tr>
+                        <td>${item.id ?? ""}</td>
+                        <td>${item.productCode ?? ""}</td>
+                        <td>${item.productName ?? ""}</td>
+                        <td>${item.quantityAdded ?? ""}</td>
+                        <td>${item.note ?? ""}</td>
+                        <td>${item.restockedAt ?? ""}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        } catch (error) {
+            showMessage("Failed to load restock history", "error");
+        }
+    }
+
+    loadRestockHistory();
+</script>
+</body>
+</html>

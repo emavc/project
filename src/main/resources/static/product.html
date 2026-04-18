@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 500px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .message {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align:center; margin-top:20px;">
+    <a href="/dashboard.html">Dashboard</a> |
+    <a href="/products.html">View Products</a>
+</div>
+
+<div class="container">
+    <h2>Add Product</h2>
+
+    <form id="productForm">
+        <label for="name">Product Name</label>
+        <input type="text" id="name" required>
+
+        <label for="productCode">Product Code</label>
+        <input type="text" id="productCode" required>
+
+        <label for="barcode">Barcode</label>
+        <input type="text" id="barcode" required>
+
+        <label for="category">Category</label>
+        <input type="text" id="category" required>
+
+        <label for="buyingPrice">Buying Price</label>
+        <input type="number" id="buyingPrice" step="0.01" required>
+
+        <label for="sellingPrice">Selling Price</label>
+        <input type="number" id="sellingPrice" step="0.01" required>
+
+        <label for="quantity">Quantity</label>
+        <input type="number" id="quantity" required>
+
+        <label for="lowStockLevel">Low Stock Level</label>
+        <input type="number" id="lowStockLevel" required>
+
+        <label for="baseUnit">Base Unit</label>
+        <input type="text" id="baseUnit" placeholder="Bottle, Piece, Packet" required>
+
+        <label for="packageName">Package Name</label>
+        <input type="text" id="packageName" placeholder="Carton, Box, Tray">
+
+        <label for="unitsPerPackage">Units Per Package</label>
+        <input type="number" id="unitsPerPackage" placeholder="12">
+
+        <button type="submit">Save Product</button>
+    </form>
+
+    <div id="message" class="message"></div>
+</div>
+
+<script>
+    const productForm = document.getElementById("productForm");
+    const messageDiv = document.getElementById("message");
+
+    productForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const product = {
+            name: document.getElementById("name").value,
+            productCode: document.getElementById("productCode").value,
+            barcode: document.getElementById("barcode").value,
+            category: document.getElementById("category").value,
+            buyingPrice: parseFloat(document.getElementById("buyingPrice").value),
+            sellingPrice: parseFloat(document.getElementById("sellingPrice").value),
+            quantity: parseInt(document.getElementById("quantity").value),
+            lowStockLevel: parseInt(document.getElementById("lowStockLevel").value),
+            baseUnit: document.getElementById("baseUnit").value,
+            packageName: document.getElementById("packageName").value,
+            unitsPerPackage: document.getElementById("unitsPerPackage").value
+                ? parseInt(document.getElementById("unitsPerPackage").value)
+                : null
+        };
+
+        try {
+            const response = await fetch("/api/products/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(product)
+            });
+
+            if (response.ok) {
+                messageDiv.textContent = "Product saved successfully!";
+                messageDiv.className = "message success";
+                productForm.reset();
+            } else {
+                messageDiv.textContent = "Failed to save product. Check duplicate barcode or code.";
+                messageDiv.className = "message error";
+            }
+        } catch (error) {
+            messageDiv.textContent = "Error connecting to server.";
+            messageDiv.className = "message error";
+        }
+    });
+</script>
+
+</body>
+</html>

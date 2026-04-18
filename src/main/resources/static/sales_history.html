@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .top-links {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .top-links a {
+            text-decoration: none;
+            margin: 0 10px;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 95%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-links">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/sales.html">Sales Page</a>
+        <a href="/products.html">Products</a>
+    </div>
+
+    <div class="container">
+        <h2>Sales History</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Sale ID</th>
+                    <th>Date</th>
+                    <th>Total Amount</th>
+                    <th>Amount Paid</th>
+                    <th>Balance</th>
+                    <th>Number of Items</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="salesTableBody"></tbody>
+        </table>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        async function loadSalesHistory() {
+            const tableBody = document.getElementById("salesTableBody");
+            const messageDiv = document.getElementById("message");
+
+            tableBody.innerHTML = "";
+            messageDiv.textContent = "";
+
+            try {
+                const response = await fetch("/api/sales/all");
+
+                if (!response.ok) {
+                    throw new Error("Failed to load sales history");
+                }
+
+                const sales = await response.json();
+
+                if (sales.length === 0) {
+                    messageDiv.textContent = "No sales found.";
+                    return;
+                }
+
+                sales.forEach(sale => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>${sale.saleId}</td>
+                        <td>${sale.saleDate}</td>
+                        <td>${sale.totalAmount}</td>
+                        <td>${sale.amountPaid}</td>
+                        <td>${sale.balance}</td>
+                        <td>${sale.items.length}</td>
+                        <td>
+                            <a href="/sales-details.html?id=${sale.saleId}" 
+                                style="text-decoration:none; padding:6px 12px; background:#007bff; color:white; border-radius:4px;">
+                                View
+                              </a>
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+
+            } catch (error) {
+                messageDiv.textContent = "Error loading sales history.";
+                console.error(error);
+            }
+        }
+
+        loadSalesHistory();
+    </script>
+
+</body>
+</html>

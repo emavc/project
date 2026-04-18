@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Low Stock Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .top-links {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .top-links a {
+            text-decoration: none;
+            margin: 0 10px;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 95%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #dc3545;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .low {
+            color: red;
+            font-weight: bold;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-links">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/products.html">Products</a>
+        <a href="/sales_history.html">Sales History</a>
+    </div>
+
+    <div class="container">
+        <h2>Low Stock Report</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Barcode</th>
+                    <th>Category</th>
+                    <th>Current Quantity</th>
+                    <th>Low Stock Level</th>
+                </tr>
+            </thead>
+            <tbody id="lowStockTableBody"></tbody>
+        </table>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        async function loadLowStockProducts() {
+            const tableBody = document.getElementById("lowStockTableBody");
+            const messageDiv = document.getElementById("message");
+
+            tableBody.innerHTML = "";
+            messageDiv.textContent = "";
+
+            try {
+                const response = await fetch("/api/products/low-stock/list");
+
+                if (!response.ok) {
+                    throw new Error("Failed to load low stock products");
+                }
+
+                const products = await response.json();
+
+                if (products.length === 0) {
+                    messageDiv.textContent = "No low stock products found.";
+                    return;
+                }
+
+                products.forEach(product => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>${product.id}</td>
+                        <td>${product.name}</td>
+                        <td>${product.productCode}</td>
+                        <td>${product.barcode}</td>
+                        <td>${product.category}</td>
+                        <td class="low">${product.quantity}</td>
+                        <td>${product.lowStockLevel}</td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+
+            } catch (error) {
+                messageDiv.textContent = "Error loading low stock report.";
+                console.error(error);
+            }
+        }
+
+        loadLowStockProducts();
+    </script>
+
+</body>
+</html>

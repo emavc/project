@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .top-bar {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .top-bar input, .top-bar button {
+            padding: 12px;
+            font-size: 15px;
+        }
+
+        .top-bar button {
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .top-bar button:hover {
+            background: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        .actions button {
+            padding: 6px 10px;
+            margin: 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .clear-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .complete-btn {
+            background: #28a745;
+            color: white;
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .complete-btn:hover {
+            background: #1f7a34;
+        }
+
+        .summary {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .card label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .card input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .receipt {
+            margin-top: 30px;
+            background: #fff;
+            border: 2px dashed #999;
+            padding: 20px;
+            display: none;
+        }
+
+        .receipt h3, .receipt p {
+            text-align: center;
+            margin: 4px 0;
+        }
+
+        .receipt table {
+            margin-top: 15px;
+        }
+
+        .print-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 12px;
+            background: #343a40;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #receiptSection, #receiptSection * {
+                visibility: visible;
+            }
+
+            #receiptSection {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Sales Page</h1>
+
+    <div id="messageBox" class="message"></div>
+
+    <div class="top-bar">
+        <input type="text" id="barcodeInput" placeholder="Enter barcode">
+        <input type="number" id="quantityInput" placeholder="Quantity" min="1" value="1">
+        <button onclick="addToCart()">Add to Cart</button>
+    </div>
+
+    <h2>Cart</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Product</th>
+            <th>Barcode</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="cartTableBody"></tbody>
+    </table>
+
+    <div class="summary">
+        <div class="card">
+            <h3>Payment Summary</h3>
+            <p><strong>Total Amount:</strong> <span id="totalAmount">0</span></p>
+            <label for="amountPaid">Amount Paid</label>
+            <input type="number" id="amountPaid" placeholder="Enter amount paid" oninput="calculateChange()">
+            <p><strong>Change:</strong> <span id="changeAmount">0</span></p>
+        </div>
+
+        <div class="card">
+            <h3>Cart Actions</h3>
+            <button class="actions clear-btn" onclick="clearCart()">Clear Cart</button>
+            <button class="complete-btn" onclick="completeSale()">Complete Sale</button>
+        </div>
+    </div>
+
+    <div id="receiptSection" class="receipt">
+        <h3>SUPERMARKET RECEIPT</h3>
+        <p id="receiptDate"></p>
+        <p>Thank you for shopping with us</p>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Subtotal</th>
+            </tr>
+            </thead>
+            <tbody id="receiptTableBody"></tbody>
+        </table>
+
+        <p><strong>Total:</strong> <span id="receiptTotal"></span></p>
+        <p><strong>Paid:</strong> <span id="receiptPaid"></span></p>
+        <p><strong>Change:</strong> <span id="receiptChange"></span></p>
+
+        <button class="print-btn" onclick="window.print()">Print Receipt</button>
+    </div>
+</div>
+
+<script>
+    let cart = [];
+
+    function showMessage(message, type) {
+        const box = document.getElementById("messageBox");
+        box.style.display = "block";
+        box.className = "message " + type;
+        box.textContent = message;
+    }
+
+    function renderCart() {
+        const tableBody = document.getElementById("cartTableBody");
+        tableBody.innerHTML = "";
+
+        if (cart.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6">Cart is empty</td>
+                </tr>
+            `;
+            updateTotals();
+            return;
+        }
+
+        cart.forEach((item, index) => {
+            const row = `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.barcode}</td>
+                    <td>${item.unitPrice}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.subtotal}</td>
+                    <td>
+                        <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
+                    </td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+
+        updateTotals();
+    }
+
+    function updateTotals() {
+        const total = cart.reduce((sum, item) => sum + item.subtotal, 0);
+        document.getElementById("totalAmount").textContent = total;
+        calculateChange();
+    }
+
+    function calculateChange() {
+        const total = cart.reduce((sum, item) => sum + item.subtotal, 0);
+        const paid = parseFloat(document.getElementById("amountPaid").value) || 0;
+        const change = paid - total;
+        document.getElementById("changeAmount").textContent = change >= 0 ? change : 0;
+    }
+
+    async function addToCart() {
+        const barcode = document.getElementById("barcodeInput").value.trim();
+        const quantity = parseInt(document.getElementById("quantityInput").value);
+
+        if (!barcode || !quantity || quantity <= 0) {
+            showMessage("Enter a valid barcode and quantity.", "error");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/products/barcode/${barcode}`);
+            if (!response.ok) {
+                throw new Error("Product not found");
+            }
+
+            const product = await response.json();
+
+            const existingItem = cart.find(item => item.barcode === barcode);
+
+            if (existingItem) {
+                existingItem.quantity += quantity;
+                existingItem.subtotal = existingItem.quantity * existingItem.unitPrice;
+            } else {
+                cart.push({
+                    productId: product.id,
+                    name: product.name,
+                    barcode: product.barcode,
+                    unitPrice: product.sellingPrice,
+                    quantity: quantity,
+                    subtotal: product.sellingPrice * quantity
+                });
+            }
+
+            document.getElementById("barcodeInput").value = "";
+            document.getElementById("quantityInput").value = 1;
+
+            renderCart();
+            showMessage("Product added to cart.", "success");
+        } catch (error) {
+            showMessage(error.message, "error");
+        }
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        renderCart();
+        showMessage("Item removed from cart.", "success");
+    }
+
+    function clearCart() {
+        cart = [];
+        renderCart();
+        document.getElementById("amountPaid").value = "";
+        document.getElementById("receiptSection").style.display = "none";
+        showMessage("Cart cleared.", "success");
+    }
+
+    async function completeSale() {
+        if (cart.length === 0) {
+            showMessage("Cart is empty.", "error");
+            return;
+        }
+
+        const total =parseFloat(document.getElementById("totalAmount").innerText) || 0;
+        const amountPaid = parseFloat(document.getElementById("amountPaid").value) || 0;
+
+        if (amountPaid < total) {
+            showMessage("Amount paid is less than total amount.", "error");
+            return;
+        }
+
+        const saleRequest = {
+            items: cart.map(item => ({
+                barcode: item.barcode,
+                quantity: item.quantity
+            })),
+            amountPaid: amountPaid
+        };
+
+        try {
+            const response = await fetch("/api/sales/complete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(saleRequest)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Failed to complete sale");
+            }
+
+            await response.json();
+
+            generateReceipt(total, amountPaid);
+            showMessage("Sale completed successfully.", "success");
+
+            cart = [];
+            renderCart();
+            document.getElementById("amountPaid").value = "";
+        } catch (error) {
+            showMessage(error.message, "error");
+        }
+    }
+
+    function generateReceipt(total, amountPaid) {
+        const receiptTableBody = document.getElementById("receiptTableBody");
+        receiptTableBody.innerHTML = "";
+
+        cart.forEach(item => {
+            receiptTableBody.innerHTML += `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.unitPrice}</td>
+                    <td>${item.subtotal}</td>
+                </tr>
+            `;
+        });
+
+        const change = amountPaid - total;
+
+        document.getElementById("receiptDate").textContent = new Date().toLocaleString();
+        document.getElementById("receiptTotal").textContent = total;
+        document.getElementById("receiptPaid").textContent = amountPaid;
+        document.getElementById("receiptChange").textContent = change;
+        document.getElementById("receiptSection").style.display = "block";
+    }
+
+    renderCart();
+</script>
+</body>
+</html>
