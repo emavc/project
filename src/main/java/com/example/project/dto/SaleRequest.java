@@ -5,7 +5,7 @@ import java.util.List;
 public class SaleRequest {
 
     private List<SaleItemRequest> items;
-    private Double amountPaid;
+    private double amountPaid;
 
     public SaleRequest() {
     }
@@ -18,11 +18,11 @@ public class SaleRequest {
         this.items = items;
     }
 
-    public Double getAmountPaid() {
+    public double getAmountPaid() {
         return amountPaid;
     }
 
-    public void setAmountPaid(Double amountPaid) {
+    public void setAmountPaid(double amountPaid) {
         this.amountPaid = amountPaid;
     }
 }

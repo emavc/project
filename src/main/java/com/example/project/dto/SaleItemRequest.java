@@ -3,22 +3,24 @@ package com.example.project.dto;
 public class SaleItemRequest {
 
     private String barcode;
-    private Integer quantity;
+    private int quantity;
 
-    public SaleItemRequest(){
-
+    public SaleItemRequest() {
     }
-    public String getBarcode(){
+
+    public String getBarcode() {
         return barcode;
     }
-    public void setBarcode(String barcode){
-        this.barcode=barcode;
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
     }
-    public Integer getQuantity(){
+
+    public int getQuantity() {
         return quantity;
     }
-    public void setQuantity(Integer quantity){
-        this.quantity=quantity;
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
-    
 }

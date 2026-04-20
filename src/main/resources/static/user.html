@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f4f6f9; padding:20px; }
+        .container { max-width:1000px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.08); }
+        input, button { padding:10px; margin:5px; }
+        button { border:none; background:#007bff; color:white; border-radius:6px; cursor:pointer; }
+        table { width:100%; border-collapse:collapse; margin-top:20px; }
+        th, td { border:1px solid #ddd; padding:10px; text-align:center; }
+        th { background:#007bff; color:white; }
+        .delete-btn { background:#dc3545; }
+        .message { margin-top:10px; padding:10px; border-radius:6px; display:none; }
+        .success { background:#d4edda; color:#155724; }
+        .error { background:#f8d7da; color:#721c24; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>User Management</h1>
+
+    <div>
+        <input type="text" id="username" placeholder="Cashier username">
+        <input type="password" id="password" placeholder="Cashier password">
+        <button onclick="createCashier()">Create Cashier</button>
+    </div>
+
+    <div id="messageBox" class="message"></div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+    </table>
+</div>
+
+<script>
+    function showMessage(message, type) {
+        const box = document.getElementById("messageBox");
+        box.style.display = "block";
+        box.className = "message " + type;
+        box.textContent = message;
+    }
+
+    async function loadUsers() {
+        const response = await fetch("/api/users");
+        const users = await response.json();
+
+        const tableBody = document.getElementById("userTableBody");
+        tableBody.innerHTML = "";
+
+        users.forEach(user => {
+            const isAdmin = user.role === "ADMIN";
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${user.id ?? ""}</td>
+                    <td>${user.username ?? ""}</td>
+                    <td>${user.role ?? ""}</td>
+                    <td>
+                        ${isAdmin ? "Protected" : `<button class="delete-btn" onclick="deleteUser(${user.id})">Delete</button>`}
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function createCashier() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!username || !password) {
+            showMessage("Username and password are required", "error");
+            return;
+        }
+
+        const response = await fetch("/api/users/cashier", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ username, password })
+        });
+
+        const text = await response.text();
+
+        if (!response.ok) {
+            showMessage(text, "error");
+            return;
+        }
+
+        showMessage("Cashier created successfully", "success");
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        loadUsers();
+    }
+
+    async function deleteUser(id) {
+        const ok = confirm("Delete this user?");
+        if (!ok) return;
+
+        const response = await fetch(`/api/users/${id}`, { method: "DELETE" });
+        const text = await response.text();
+
+        if (!response.ok) {
+            showMessage(text, "error");
+            return;
+        }
+
+        showMessage(text, "success");
+        loadUsers();
+    }
+
+    loadUsers();
+</script>
+</body>
+</html>

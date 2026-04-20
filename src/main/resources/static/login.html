@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Supermarket System</title>
+    <title>Login - EMAVCMEN</title>
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #007bff, #6610f2);
+            background: linear-gradient(135deg, #081226, #0d2a52, #123d73);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,14 +23,37 @@
         .login-box {
             background: white;
             padding: 30px;
-            width: 350px;
-            border-radius: 10px;
-            box-shadow: 0 0 12px rgba(0,0,0,0.2);
+            width: 360px;
+            border-radius: 14px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.25);
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .brand img {
+            width: 90px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .brand-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #0d2a52;
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: #666;
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 25px;
+            margin: 20px 0;
+            color: #007bff;
         }
 
         .form-group {
@@ -40,20 +68,22 @@
 
         input {
             width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
+            padding: 11px;
             font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
         }
 
         button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: #007bff;
             border: none;
             color: white;
             font-size: 16px;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 6px;
+            margin-top: 10px;
         }
 
         button:hover {
@@ -64,14 +94,18 @@
             text-align: center;
             margin-bottom: 15px;
             font-size: 14px;
+            padding: 8px;
+            border-radius: 6px;
         }
 
         .error {
-            color: red;
+            background: #f8d7da;
+            color: #721c24;
         }
 
         .success {
-            color: green;
+            background: #d4edda;
+            color: #155724;
         }
 
         .demo {
@@ -79,13 +113,29 @@
             background: #f8f9fa;
             padding: 10px;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
         }
     </style>
 </head>
 <body>
 
 <div class="login-box">
+
+    <!-- 🔥 BRAND HEADER -->
+    <div class="brand">
+        <img src="/logo.png" alt="EMAVCMEN Logo">
+        <div class="brand-name">EMAVCMEN</div>
+        <div class="tagline">Build • Create • Succeed</div>
+    </div>
+
     <h2>System Login</h2>
 
     <div id="messageBox" class="message"></div>
@@ -109,6 +159,11 @@
         admin / admin123<br>
         cashier / cashier123
     </div>
+
+    <div class="footer">
+        © 2026 EMAVCMEN
+    </div>
+
 </div>
 
 <script>

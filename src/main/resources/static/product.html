@@ -4,54 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product</title>
-    
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
             background: #f4f6f9;
             margin: 0;
             padding: 0;
+            color: #333;
+        }
+
+        .top-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .top-links a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            margin: 0 10px;
         }
 
         .container {
-            width: 500px;
-            margin: 40px auto;
+            width: 95%;
+            max-width: 950px;
+            margin: 30px auto;
             background: white;
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 14px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
         }
 
         h2 {
             text-align: center;
             margin-bottom: 20px;
-            color: #333;
+            color: #007bff;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 25px;
+        }
+
+        .form-section,
+        .scanner-section {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #eee;
         }
 
         label {
             font-weight: bold;
             display: block;
-            margin-top: 10px;
+            margin-top: 12px;
         }
 
         input {
             width: 100%;
             padding: 10px;
-            margin-top: 5px;
+            margin-top: 6px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            box-sizing: border-box;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
         }
 
         button {
-            width: 100%;
-            margin-top: 20px;
+            flex: 1;
+            min-width: 140px;
             padding: 12px;
             background: #007bff;
             color: white;
             border: none;
             border-radius: 6px;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
         }
 
@@ -59,73 +99,220 @@
             background: #0056b3;
         }
 
+        .secondary-btn {
+            background: #28a745;
+        }
+
+        .secondary-btn:hover {
+            background: #1f7a34;
+        }
+
+        .danger-btn {
+            background: #dc3545;
+        }
+
+        .danger-btn:hover {
+            background: #b52b3a;
+        }
+
         .message {
             margin-top: 15px;
             text-align: center;
             font-weight: bold;
+            padding: 10px;
+            border-radius: 6px;
         }
 
         .success {
-            color: green;
+            background: #d4edda;
+            color: #155724;
         }
 
         .error {
-            color: red;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        #reader {
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .scanner-note {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        .barcode-preview {
+            margin-top: 12px;
+            padding: 10px;
+            background: #eef5ff;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0056b3;
+            word-break: break-word;
+        }
+
+        @media (max-width: 850px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div style="text-align:center; margin-top:20px;">
+
+<div class="top-links">
     <a href="/dashboard.html">Dashboard</a> |
-    <a href="/products.html">View Products</a>
+    <a href="/product.html">View Products</a>
 </div>
 
 <div class="container">
     <h2>Add Product</h2>
 
-    <form id="productForm">
-        <label for="name">Product Name</label>
-        <input type="text" id="name" required>
+    <div class="layout">
+        <div class="form-section">
+            <form id="productForm">
+                <label for="name">Product Name</label>
+                <input type="text" id="name" required>
 
-        <label for="productCode">Product Code</label>
-        <input type="text" id="productCode" required>
+                <label for="productCode">Product Code</label>
+                <input type="text" id="productCode" required>
 
-        <label for="barcode">Barcode</label>
-        <input type="text" id="barcode" required>
+                <label for="barcode">Barcode</label>
+                <input type="text" id="barcode" required>
 
-        <label for="category">Category</label>
-        <input type="text" id="category" required>
+                <label for="category">Category</label>
+                <input type="text" id="category" required>
 
-        <label for="buyingPrice">Buying Price</label>
-        <input type="number" id="buyingPrice" step="0.01" required>
+                <label for="buyingPrice">Buying Price</label>
+                <input type="number" id="buyingPrice" step="0.01" required>
 
-        <label for="sellingPrice">Selling Price</label>
-        <input type="number" id="sellingPrice" step="0.01" required>
+                <label for="sellingPrice">Selling Price</label>
+                <input type="number" id="sellingPrice" step="0.01" required>
 
-        <label for="quantity">Quantity</label>
-        <input type="number" id="quantity" required>
+                <label for="quantity">Quantity</label>
+                <input type="number" id="quantity" required>
 
-        <label for="lowStockLevel">Low Stock Level</label>
-        <input type="number" id="lowStockLevel" required>
+                <label for="lowStockLevel">Low Stock Level</label>
+                <input type="number" id="lowStockLevel" required>
 
-        <label for="baseUnit">Base Unit</label>
-        <input type="text" id="baseUnit" placeholder="Bottle, Piece, Packet" required>
+                <label for="baseUnit">Base Unit</label>
+                <input type="text" id="baseUnit" placeholder="Bottle, Piece, Packet" required>
 
-        <label for="packageName">Package Name</label>
-        <input type="text" id="packageName" placeholder="Carton, Box, Tray">
+                <label for="packageName">Package Name</label>
+                <input type="text" id="packageName" placeholder="Carton, Box, Tray">
 
-        <label for="unitsPerPackage">Units Per Package</label>
-        <input type="number" id="unitsPerPackage" placeholder="12">
+                <label for="unitsPerPackage">Units Per Package</label>
+                <input type="number" id="unitsPerPackage" placeholder="12">
 
-        <button type="submit">Save Product</button>
-    </form>
+                <div class="button-row">
+                    <button type="submit">Save Product</button>
+                    <button type="button" class="secondary-btn" onclick="fillDemoBarcode()">Test Barcode</button>
+                </div>
+            </form>
 
-    <div id="message" class="message"></div>
+            <div id="message" class="message" style="display:none;"></div>
+        </div>
+
+        <div class="scanner-section">
+            <h3>Scan Barcode with Camera</h3>
+            <p class="scanner-note">
+                Click <strong>Start Scanner</strong>, allow camera access, then point the camera at the barcode.
+                When a barcode is detected, it will automatically fill the barcode field.
+            </p>
+
+            <div class="button-row">
+                <button type="button" onclick="startScanner()">Start Scanner</button>
+                <button type="button" class="danger-btn" onclick="stopScanner()">Stop Scanner</button>
+            </div>
+
+            <div id="reader"></div>
+
+            <div class="barcode-preview">
+                Scanned Barcode: <span id="scannedValue">None</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     const productForm = document.getElementById("productForm");
     const messageDiv = document.getElementById("message");
+    const barcodeInput = document.getElementById("barcode");
+    const scannedValue = document.getElementById("scannedValue");
+
+    let html5QrCode = null;
+    let scannerRunning = false;
+
+    function showMessage(text, type) {
+        messageDiv.style.display = "block";
+        messageDiv.textContent = text;
+        messageDiv.className = "message " + type;
+    }
+
+    function fillDemoBarcode() {
+        barcodeInput.value = "1234567890123";
+        scannedValue.textContent = "1234567890123";
+        showMessage("Test barcode inserted.", "success");
+    }
+
+    async function startScanner() {
+        if (scannerRunning) {
+            showMessage("Scanner is already running.", "error");
+            return;
+        }
+
+        try {
+            html5QrCode = new Html5Qrcode("reader");
+
+            await html5QrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 120 },
+                    aspectRatio: 1.7778,
+                    rememberLastUsedCamera: true,
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                },
+                (decodedText) => {
+                    barcodeInput.value = decodedText;
+                    scannedValue.textContent = decodedText;
+                    showMessage("Barcode scanned successfully.", "success");
+                    stopScanner();
+                },
+                (errorMessage) => {
+                    // Keep quiet during scan attempts
+                    console.log("Scanning...", errorMessage);
+                }
+            );
+
+            scannerRunning = true;
+            showMessage("Camera scanner started.", "success");
+        } catch (error) {
+            console.error(error);
+            showMessage("Failed to start scanner. Check camera permission, HTTPS, or browser support.", "error");
+        }
+    }
+
+    async function stopScanner() {
+        try {
+            if (html5QrCode && scannerRunning) {
+                await html5QrCode.stop();
+                await html5QrCode.clear();
+                scannerRunning = false;
+                showMessage("Scanner stopped.", "success");
+            }
+        } catch (error) {
+            console.error(error);
+            showMessage("Could not stop scanner cleanly.", "error");
+        }
+    }
 
     productForm.addEventListener("submit", async function(event) {
         event.preventDefault();
@@ -156,16 +343,15 @@
             });
 
             if (response.ok) {
-                messageDiv.textContent = "Product saved successfully!";
-                messageDiv.className = "message success";
+                showMessage("Product saved successfully!", "success");
                 productForm.reset();
+                scannedValue.textContent = "None";
             } else {
-                messageDiv.textContent = "Failed to save product. Check duplicate barcode or code.";
-                messageDiv.className = "message error";
+                showMessage("Failed to save product. Check duplicate barcode or code.", "error");
             }
         } catch (error) {
-            messageDiv.textContent = "Error connecting to server.";
-            messageDiv.className = "message error";
+            console.error(error);
+            showMessage("Error connecting to server.", "error");
         }
     });
 </script>

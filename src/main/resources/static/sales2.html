@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Page</title>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
             background: #f4f6f9;
@@ -17,12 +24,13 @@
             margin: auto;
             background: #fff;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 0 0 10px rgba(0,0,0,0.08);
         }
 
-        h1, h2 {
+        h1, h2, h3 {
             text-align: center;
+            margin-top: 0;
         }
 
         .top-bar {
@@ -49,6 +57,63 @@
             background: #0056b3;
         }
 
+        .scanner-box {
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .scanner-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .scanner-actions button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .start-btn {
+            background: #28a745;
+        }
+
+        .start-btn:hover {
+            background: #1f7a34;
+        }
+
+        .stop-btn {
+            background: #dc3545;
+        }
+
+        .stop-btn:hover {
+            background: #b52b3a;
+        }
+
+        #reader {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto 10px auto;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .scan-result {
+            text-align: center;
+            font-size: 15px;
+            margin-top: 10px;
+            color: #333;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -66,22 +131,33 @@
             color: white;
         }
 
-        .actions button {
+        .remove-btn {
             padding: 6px 10px;
-            margin: 2px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-        }
-
-        .remove-btn {
             background: #dc3545;
             color: white;
+        }
+
+        .remove-btn:hover {
+            background: #b52b3a;
         }
 
         .clear-btn {
             background: #6c757d;
             color: white;
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .clear-btn:hover {
+            background: #545b62;
         }
 
         .complete-btn {
@@ -90,7 +166,6 @@
             width: 100%;
             padding: 14px;
             font-size: 16px;
-            margin-top: 15px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -154,6 +229,10 @@
             cursor: pointer;
         }
 
+        .print-btn:hover {
+            background: #1f2327;
+        }
+
         .message {
             margin-top: 15px;
             padding: 12px;
@@ -187,6 +266,16 @@
                 width: 100%;
             }
         }
+
+        @media (max-width: 900px) {
+            .top-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -199,6 +288,21 @@
         <input type="text" id="barcodeInput" placeholder="Enter barcode">
         <input type="number" id="quantityInput" placeholder="Quantity" min="1" value="1">
         <button onclick="addToCart()">Add to Cart</button>
+    </div>
+
+    <div class="scanner-box">
+        <h3>Scan Barcode with Camera</h3>
+
+        <div class="scanner-actions">
+            <button type="button" class="start-btn" onclick="startScanner()">Start Camera Scan</button>
+            <button type="button" class="stop-btn" onclick="stopScanner()">Stop Scanner</button>
+        </div>
+
+        <div id="reader"></div>
+
+        <div class="scan-result">
+            Scanned Barcode: <strong id="scanResult">None</strong>
+        </div>
     </div>
 
     <h2>Cart</h2>
@@ -220,14 +324,16 @@
         <div class="card">
             <h3>Payment Summary</h3>
             <p><strong>Total Amount:</strong> <span id="totalAmount">0</span></p>
+
             <label for="amountPaid">Amount Paid</label>
             <input type="number" id="amountPaid" placeholder="Enter amount paid" oninput="calculateChange()">
+
             <p><strong>Change:</strong> <span id="changeAmount">0</span></p>
         </div>
 
         <div class="card">
             <h3>Cart Actions</h3>
-            <button class="actions clear-btn" onclick="clearCart()">Clear Cart</button>
+            <button class="clear-btn" onclick="clearCart()">Clear Cart</button>
             <button class="complete-btn" onclick="completeSale()">Complete Sale</button>
         </div>
     </div>
@@ -259,6 +365,8 @@
 
 <script>
     let cart = [];
+    let html5QrCode = null;
+    let scanning = false;
 
     function showMessage(message, type) {
         const box = document.getElementById("messageBox");
@@ -308,16 +416,16 @@
 
     function calculateChange() {
         const total = cart.reduce((sum, item) => sum + item.subtotal, 0);
-        const paid = parseFloat(document.getElementById("amountPaid").value) || 0;
-        const change = paid - total;
+        const amountPaid = parseFloat(document.getElementById("amountPaid").value) || 0;
+        const change = amountPaid - total;
         document.getElementById("changeAmount").textContent = change >= 0 ? change : 0;
     }
 
     async function addToCart() {
         const barcode = document.getElementById("barcodeInput").value.trim();
-        const quantity = parseInt(document.getElementById("quantityInput").value);
+        const quantity = parseInt(document.getElementById("quantityInput").value) || 1;
 
-        if (!barcode || !quantity || quantity <= 0) {
+        if (!barcode || quantity <= 0) {
             showMessage("Enter a valid barcode and quantity.", "error");
             return;
         }
@@ -376,7 +484,7 @@
             return;
         }
 
-        const total =parseFloat(document.getElementById("totalAmount").innerText) || 0;
+        const total = parseFloat(document.getElementById("totalAmount").innerText) || 0;
         const amountPaid = parseFloat(document.getElementById("amountPaid").value) || 0;
 
         if (amountPaid < total) {
@@ -441,6 +549,59 @@
         document.getElementById("receiptPaid").textContent = amountPaid;
         document.getElementById("receiptChange").textContent = change;
         document.getElementById("receiptSection").style.display = "block";
+    }
+
+    async function startScanner() {
+        if (scanning) {
+            showMessage("Scanner is already running.", "error");
+            return;
+        }
+
+        try {
+            html5QrCode = new Html5Qrcode("reader");
+
+            await html5QrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 120 },
+                    aspectRatio: 1.7778
+                },
+                (decodedText) => {
+                    document.getElementById("barcodeInput").value = decodedText;
+                    document.getElementById("scanResult").innerText = decodedText;
+                    showMessage("Barcode scanned successfully.", "success");
+
+                    stopScanner();
+
+                    setTimeout(() => {
+                        addToCart();
+                    }, 300);
+                },
+                (errorMessage) => {
+                    console.log("Scanning...", errorMessage);
+                }
+            );
+
+            scanning = true;
+            showMessage("Camera scanner started.", "success");
+        } catch (error) {
+            console.error(error);
+            showMessage("Failed to start scanner. Allow camera permission and use localhost or HTTPS.", "error");
+        }
+    }
+
+    async function stopScanner() {
+        try {
+            if (html5QrCode && scanning) {
+                await html5QrCode.stop();
+                await html5QrCode.clear();
+                scanning = false;
+                showMessage("Scanner stopped.", "success");
+            }
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     renderCart();
